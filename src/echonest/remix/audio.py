@@ -44,6 +44,7 @@ import xml.etree.ElementTree as etree
 import xml.dom.minidom as minidom
 import weakref
 
+sys.path.append('/Users/iorife/github/pyechonest')
 from pyechonest import track
 from pyechonest.util import EchoNestAPIError
 import pyechonest.util
@@ -1499,6 +1500,11 @@ class AudioQuantumList(list, AudioRenderable):
     `loudness_begin`, `loudness_max`, `time_loudness_max`, and `loudness_end`
     are available.
     """
+
+    @property
+    def durations(self):
+        return self._durations
+
     def __init__(self, initial = None, kind = None, container = None, source = None):
         """
         Initializes an `AudioQuantumList`. All parameters are optional.
@@ -1668,6 +1674,11 @@ class Simultaneous(AudioQuantumList):
     Sample usage::
         Simultaneous(a.analysis.bars).encode("my.mp3")
     """
+
+    @property
+    def durations(self):
+        return self._durations
+
     def __init__(self, *args, **kwargs):
         AudioQuantumList.__init__(self, *args, **kwargs)
 

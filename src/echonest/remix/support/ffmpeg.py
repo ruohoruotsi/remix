@@ -11,7 +11,8 @@ from exceptionthread import ExceptionThread
 log = logging.getLogger(__name__)
 
 # Base name of the ffmpeg binary. Can be monkey-patched if desired.
-FFMPEG = 'en-ffmpeg'
+# FFMPEG = 'en-ffmpeg'
+FFMPEG = '/Users/iorife/github/remix/external/en-ffmpeg/mac/en-ffmpeg'
 
 def get_os():
     """returns is_linux, is_mac, is_windows"""
