@@ -213,14 +213,21 @@ class AudioAnalysis(object):
             self.rhythmstring = None
             log.info("No _string data returned for track")
 
-        for attribute in ('time_signature', 'mode', 'tempo', 'key'):
+        # for attribute in ('time_signature', 'mode', 'tempo', 'key'):
+        #     d = {'value': getattr(self.pyechonest_track, attribute),
+        #          'confidence': getattr(self.pyechonest_track, attribute + '_confidence')}
+        #     setattr(self, attribute, d)
+        #
+        # for attribute in ('end_of_fade_in', 'start_of_fade_out', 'duration', 'loudness'):
+        #     setattr(self, attribute, getattr(self.pyechonest_track, attribute))
+
+        for attribute in ('time_signature', 'tempo', 'key'):
             d = {'value': getattr(self.pyechonest_track, attribute),
                  'confidence': getattr(self.pyechonest_track, attribute + '_confidence')}
             setattr(self, attribute, d)
 
-        for attribute in ('end_of_fade_in', 'start_of_fade_out', 'duration', 'loudness'):
+        for attribute in ('duration', 'loudness'):
             setattr(self, attribute, getattr(self.pyechonest_track, attribute))
-
     @property
     def bars(self):
         if self._bars is None:
