@@ -11,7 +11,7 @@ from .utils import strlit2bytes
 log = logging.getLogger(__name__)
 
 # Base name of the ffmpeg binary. Can be monkey-patched if desired.
-FFMPEG = '/Users/iorife/github/remix/external/en-ffmpeg/mac/en-ffmpeg'
+FFMPEG = os.environ["HOME"] + "/github/remix/external/en-ffmpeg/mac/en-ffmpeg"
 
 
 def get_os():

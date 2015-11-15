@@ -42,7 +42,7 @@ import xml.dom.minidom as minidom
 import weakref
 
 import sys
-sys.path.append('/Users/iorife/github/pyechonest')
+sys.path.append(os.environ["HOME"] + "/github/pyechonest")
 import pyechonest.track as track
 
 from support.ffmpeg import ffmpeg, ffmpeg_downconvert
