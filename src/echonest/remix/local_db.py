@@ -60,7 +60,7 @@ def save_audio_to_local(track_md5, audio_file):
 def save_analysis_to_local(track_md5, pyechonest_track):
     '''Save the pyechonest track dict as json to the db.'''
     target_file = ANALYSIS_FOLDER + os.path.sep + track_md5 + '.analysis'
-    with open(target_file, 'wb') as db_file:
+    with open(target_file, 'w') as db_file:
         json.dump(pyechonest_track.__dict__, db_file)
 
 def get_audio_file(track_md5):

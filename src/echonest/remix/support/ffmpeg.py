@@ -5,14 +5,17 @@ import numpy
 import logging
 import tempfile
 import subprocess
-import cStringIO
-from exceptionthread import ExceptionThread
+from io import StringIO
+# from exceptionthread import ExceptionThread
+
+from .utils import strlit2bytes
 
 log = logging.getLogger(__name__)
 
 # Base name of the ffmpeg binary. Can be monkey-patched if desired.
 # FFMPEG = 'en-ffmpeg'
-FFMPEG = '/Users/iorife/github/remix/external/en-ffmpeg/mac/en-ffmpeg'
+FFMPEG = '/Users/iroro/github/remix/external/en-ffmpeg/mac/en-ffmpeg'
+
 
 def get_os():
     """returns is_linux, is_mac, is_windows"""
@@ -101,7 +104,7 @@ def ffmpeg(infile, outfile=None, overwrite=True, bitRate=None,
             pass
     # If FFMPEG couldn't read that, let's write to a temp file
     # For some reason, this always seems to work from file (but not pipe)
-    if 'Could not find codec parameters' in e and not lastTry:
+    if strlit2bytes('Could not find codec parameters') in e and not lastTry:
         log.warning("FFMPEG couldn't find codec parameters - writing to temp file.")
         fd, name = tempfile.mkstemp('.audio')
         handle = os.fdopen(fd, 'w')
@@ -172,7 +175,7 @@ def ffmpeg_downconvert(infile, lastTry=False):
         return r
     ffmpeg_error_check(e)
 
-    io = cStringIO.StringIO(f)
+    io = StringIO.StringIO(f)
     end = time.time()
     io.seek(0, os.SEEK_END)
     bytesize = io.tell()
@@ -186,17 +189,17 @@ def settings_from_ffmpeg(parsestring):
     Parses the output of ffmpeg to determine sample rate and frequency of
     an audio file.
     """
-    parse = parsestring.split('\n')
+    parse = parsestring.split(strlit2bytes('\n'))
     freq, chans = 44100, 2
     for line in parse:
-        if "Stream #0" in line and "Audio" in line:
-            segs = line.split(", ")
+        if strlit2bytes('Stream #0') in line and strlit2bytes('Audio') in line:
+            segs = line.split(strlit2bytes(', '))
             for s in segs:
-                if "Hz" in s:
-                    freq = int(s.split(" ")[0])
-                elif "stereo" in s:
+                if strlit2bytes('Hz') in s:
+                    freq = int(s.split(strlit2bytes(' '))[0])
+                elif strlit2bytes('stereo') in s:
                     chans = 2
-                elif "mono" in s:
+                elif strlit2bytes('mono') in s:
                     chans = 1
     return freq, chans
 
@@ -209,7 +212,7 @@ the appropriate binary.
 
 def ffmpeg_error_check(parsestring):
     "Looks for known errors in the ffmpeg output"
-    parse = parsestring.split('\n')
+    parse = parsestring.split(strlit2bytes('\n'))
     error_cases = ["Unknown format",        # ffmpeg can't figure out format of input file
                    "error occur",           # an error occurred
                    "Could not open",        # user doesn't have permission to access file
@@ -218,9 +221,9 @@ def ffmpeg_error_check(parsestring):
                    "Could not find codec",  # corrupted, incomplete, or otherwise bad file
                     ]
     for num, line in enumerate(parse):
-        if "command not found" in line or FFMPEG+": not found" in line:
+        if strlit2bytes('command not found') in line or strlit2bytes(FFMPEG + ": not found") in line:
             raise RuntimeError(ffmpeg_install_instructions)
         for error in error_cases:
-            if error in line:
+            if strlit2bytes(error) in line:
                 report = "\n\t".join(parse[num:])
                 raise RuntimeError("ffmpeg conversion error:\n\t" + report)

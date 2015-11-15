@@ -28,10 +28,9 @@ __version__ = "$Revision: 0 $"
 import hashlib
 import numpy
 import os
-import sys
 import errno
-import cPickle
-import shutil
+# import cPickle
+# import shutil
 import struct
 import tempfile
 import logging
@@ -39,18 +38,27 @@ import wave
 import time
 import json
 import traceback
-import cStringIO
+from io import StringIO
 import xml.etree.ElementTree as etree
 import xml.dom.minidom as minidom
 import weakref
 
-sys.path.append('/Users/iorife/github/pyechonest')
-from pyechonest import track
-from pyechonest.util import EchoNestAPIError
-import pyechonest.util
-import pyechonest.config as config
+import sys
+sys.path.append('/Users/iroro/github/pyechonest')
+print(sys.path)
+import pyechonest.track as track
+import pyechonest.util as util
+
+#from pyechonest import track
+#from pyechonest.util import EchoNestAPIError
+#from pyechonest import util
+#import pyechonest.util
+#import pyechonest.track
+#import pyechonest.config as config
 
 from support.ffmpeg import ffmpeg, ffmpeg_downconvert
+from support.utils import strlit2bytes
+
 from local_db import check_and_create_local_db
 from local_db import check_db
 from local_db import save_to_local
@@ -105,20 +113,24 @@ class AudioAnalysis(object):
         .. _Analyze API: http://developer.echonest.com/docs/v4/track.html
         .. _Echo Nest: http://the.echonest.com/
         """
-        if type(initializer) not in [str, unicode] and not hasattr(initializer, 'read'):
+        if type(initializer) not in [str] and not hasattr(initializer, 'read'):
             # Argument is invalid.
             raise TypeError("Argument 'initializer' must be a string \
                             representing either a filename, track ID, or MD5, or \
                             instead, a file-like object.")
 
         try:
-            if isinstance(initializer, basestring):
+            if isinstance(initializer, str):
                 # see if path_or_identifier is a path or an ID
                 if os.path.isfile(initializer): 
                     # read from the local analysis file
                     if fromLocal:
                         with open(initializer, 'rb') as f:
-                            track_dict = json.loads(f.read())
+
+                            str_response = f.read().decode('utf-8')
+                            print(str_response)
+                            track_dict = json.loads(str_response)
+
                         self.pyechonest_track = track.Track(track_dict['id'], track_dict['md5'], track_dict)
                     # read from the actual file and send it for analysis
                     if not fromLocal:
@@ -173,7 +185,7 @@ class AudioAnalysis(object):
                     initializer.seek(-1, os.SEEK_END)
                     new_len = initializer.tell()
                     initializer.seek(0)
-                    initializer = cStringIO.StringIO(initializer.read(new_len))
+                    initializer = StringIO.StringIO(initializer.read(new_len))
                 self.__init__(initializer, filetype, lastTry=True)
                 return
             else:
@@ -527,11 +539,11 @@ class AudioData(AudioRenderable):
         fid = open(tempfilename, 'wb')
         # Based on Scipy svn
         # http://projects.scipy.org/pipermail/scipy-svn/2007-August/001189.html
-        fid.write('RIFF')
-        fid.write(struct.pack('<i', 0))  # write a 0 for length now, we'll go back and add it later
-        fid.write('WAVE')
+        fid.write(strlit2bytes('RIFF'))
+        fid.write(struct.pack(strlit2bytes('<i'), 0))  # write a 0 for length now, we'll go back and add it later
+        fid.write(strlit2bytes('WAVE'))
         # fmt chunk
-        fid.write('fmt ')
+        fid.write(strlit2bytes('fmt '))
         if self.data.ndim == 1:
             noc = 1
         else:
@@ -539,16 +551,16 @@ class AudioData(AudioRenderable):
         bits = self.data.dtype.itemsize * 8
         sbytes = self.sampleRate * (bits / 8) * noc
         ba = noc * (bits / 8)
-        fid.write(struct.pack('<ihHiiHH', 16, 1, noc, self.sampleRate, sbytes, ba, bits))
+        fid.write(struct.pack(strlit2bytes('<ihHiiHH'), 16, 1, noc, self.sampleRate, int(sbytes), int(ba), bits))
         # data chunk
-        fid.write('data')
-        fid.write(struct.pack('<i', self.data.nbytes))
+        fid.write(strlit2bytes('data'))
+        fid.write(struct.pack(strlit2bytes('<i'), self.data.nbytes))
         self.data.tofile(fid)
         # Determine file size and place it in correct
         # position at start of the file.
         size = fid.tell()
         fid.seek(4)
-        fid.write(struct.pack('<i', size - 8))
+        fid.write(struct.pack(strlit2bytes('<i'), size - 8))
         fid.close()
         if not mp3:
             return tempfilename
@@ -794,12 +806,12 @@ def mix(dataA, dataB, mix=0.5):
     """
     if dataA.endindex > dataB.endindex:
         newdata = AudioData(ndarray=dataA.data, sampleRate=dataA.sampleRate, numChannels=dataA.numChannels, defer=False)
-        newdata.data *= float(mix)
-        newdata.data[:dataB.endindex] += dataB.data[:] * (1 - float(mix))
+        newdata.data = newdata.data * float(mix)
+        newdata.data[:dataB.endindex] = newdata.data[:dataB.endindex] + dataB.data[:] * (1 - float(mix))
     else:
         newdata = AudioData(ndarray=dataB.data, sampleRate=dataB.sampleRate, numChannels=dataB.numChannels, defer=False)
-        newdata.data *= 1 - float(mix)
-        newdata.data[:dataA.endindex] += dataA.data[:] * float(mix)
+        newdata.data = newdata.data * (1 - float(mix))
+        newdata.data[:dataA.endindex] = newdata.data[:dataA.endindex] + dataA.data[:] * float(mix)
     return newdata
 
 
@@ -850,7 +862,7 @@ def truncatemix(dataA, dataB, mix=0.5):
     """
     newdata = AudioData(ndarray=dataA.data, sampleRate=dataA.sampleRate,
                         numChannels=dataA.numChannels, verbose=False)
-    newdata.data *= float(mix)
+    newdata.data = newdata.data * float(mix)
     if dataB.endindex > dataA.endindex:
         newdata.data[:] += dataB.data[:dataA.endindex] * (1 - float(mix))
     else:
@@ -902,7 +914,7 @@ class LocalAudioFile(AudioData):
 
         # Make sure we have a local database
         check_and_create_local_db()
-        track_md5 = hashlib.md5(file(filename, 'rb').read()).hexdigest()
+        track_md5 = hashlib.md5(open(filename, 'rb').read()).hexdigest()
         if check_db(track_md5):
             log.info("Loading audio from local db")
             filename = get_audio_file(track_md5)
@@ -966,7 +978,7 @@ class LocalAnalysis(object):
         :param filename: path to a local MP3 file
         """
 
-        track_md5 = hashlib.md5(file(filename, 'rb').read()).hexdigest()
+        track_md5 = hashlib.md5(open(filename, 'rb').read()).hexdigest()
         if verbose:
             log.info("Computed MD5 of file is %s", track_md5)
         try:
