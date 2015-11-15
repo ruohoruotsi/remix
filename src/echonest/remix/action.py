@@ -5,11 +5,9 @@ action.py
 
 Created by Tristan Jehan and Jason Sundram.
 """
-import os
+
 import dirac
-import sys
 from numpy import zeros, multiply, float32, mean, copy
-from math import atan, pi
 from echonest.remix.audio import assemble, AudioData
 from cAction import limit, crossfade, fadein, fadeout
 

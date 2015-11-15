@@ -1,20 +1,17 @@
 import os
-import sys
 import time
 import numpy
 import logging
 import tempfile
 import subprocess
 from io import StringIO
-# from exceptionthread import ExceptionThread
 
 from .utils import strlit2bytes
 
 log = logging.getLogger(__name__)
 
 # Base name of the ffmpeg binary. Can be monkey-patched if desired.
-# FFMPEG = 'en-ffmpeg'
-FFMPEG = '/Users/iroro/github/remix/external/en-ffmpeg/mac/en-ffmpeg'
+FFMPEG = '/Users/iorife/github/remix/external/en-ffmpeg/mac/en-ffmpeg'
 
 
 def get_os():
@@ -24,6 +21,7 @@ def get_os():
             return False, True, False
         return True, False, False
     return False, False, True
+
 
 def ensure_valid(filename):
     command = "%s -i %s -acodec copy -f null -" % (FFMPEG, filename)

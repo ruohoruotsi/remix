@@ -29,8 +29,6 @@ import hashlib
 import numpy
 import os
 import errno
-# import cPickle
-# import shutil
 import struct
 import tempfile
 import logging
@@ -44,17 +42,8 @@ import xml.dom.minidom as minidom
 import weakref
 
 import sys
-sys.path.append('/Users/iroro/github/pyechonest')
-print(sys.path)
+sys.path.append('/Users/iorife/github/pyechonest')
 import pyechonest.track as track
-import pyechonest.util as util
-
-#from pyechonest import track
-#from pyechonest.util import EchoNestAPIError
-#from pyechonest import util
-#import pyechonest.util
-#import pyechonest.track
-#import pyechonest.config as config
 
 from support.ffmpeg import ffmpeg, ffmpeg_downconvert
 from support.utils import strlit2bytes

@@ -197,7 +197,7 @@ class SynchronizedAV():
         # video frames (some may be symlinked)
         self.video.render(dir=videodir)
         # video file
-        print sequencetomovie(videofile, self.video, audioout)
+        print(sequencetomovie(videofile, self.video, audioout))
 
 
 def loadav(videofile, verbose=True):
