@@ -439,7 +439,7 @@ class AudioData(AudioRenderable):
             return self.getsample(index)
 
     def getslice(self, index):
-        "Help `__getitem__` return a new AudioData for a given slice"
+        """Help `__getitem__` return a new AudioData for a given slice"""
         if not isinstance(self.data, numpy.ndarray) and self.defer:
             self.load()
         if isinstance(index.start, float):
@@ -1038,7 +1038,6 @@ class AudioQuantum(AudioRenderable):
         if self._source:
             return self._source
         else:
-            source = None
             try:
                 source = self.container.source
             except AttributeError:
@@ -1227,7 +1226,7 @@ class AudioQuantum(AudioRenderable):
             loc  = group.index(self)
         except Exception:  # seem to be some uncontained beats
             loc = 0
-        return (loc, count,)
+        return loc, count,
 
     def absolute_context(self):
         """
@@ -1239,7 +1238,7 @@ class AudioQuantum(AudioRenderable):
         group = self.container
         count = len(group)
         loc = group.index(self)
-        return (loc, count,)
+        return loc, count,
 
     def context_string(self):
         """
@@ -1345,10 +1344,10 @@ class AudioSegment(AudioQuantum):
             elif tatum.start < self.start and tatum.end > self.end:
                 filtered_tatums.append((tatum, self.duration))
             # If the tatum overlaps and starts before the segment
-            elif tatum.start < self.start and tatum.end > self.start:
+            elif tatum.start < self.start < tatum.end:
                 filtered_tatums.append((tatum, tatum.end - self.start))
             # If the tatum overlaps and starts after the segment
-            elif tatum.start < self.end and tatum.end > self.end:
+            elif tatum.start < self.end < tatum.end:
                 filtered_tatums.append((tatum, self.end - tatum.start))
             # If we're past the segment, stop
             elif tatum.start > self.end:
@@ -1371,7 +1370,9 @@ class ModifiedRenderable(AudioRenderable):
     """Class that contains any AudioRenderable, but overrides the
     render() method with nested effects, called sequentially on the
     result of the preceeding effect."""
-    def __init__(self, original, effects=[]):
+    def __init__(self, original, effects=None):
+        if not effects:
+            effects = []
         if isinstance(original, ModifiedRenderable):
             self._original = original._original
             self._effects = original._effects + effects
@@ -1478,7 +1479,7 @@ class TimeTruncateLength(AudioEffect):
     def __init__(self, new_duration):
         self.new_duration = new_duration
 
-    def duration(self, old_duration):
+    def duration(self):
         return self.new_duration
 
     def modify(self, adata):
@@ -1513,9 +1514,6 @@ class AudioQuantumList(list, AudioRenderable):
     def durations(self):
         return self._durations
 
-    @property
-    def durations(self):
-        return self._durations
 
     def __init__(self, initial = None, kind = None, container = None, source = None):
         """
