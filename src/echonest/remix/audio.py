@@ -555,7 +555,7 @@ class AudioData(AudioRenderable):
             return tempfilename
         # now convert it to mp3
         if not filename.lower().endswith('.mp3'):
-            filename = filename + '.mp3'
+            filename += '.mp3'
         try:
             bitRate = MP3_BITRATE
         except NameError:
@@ -699,7 +699,7 @@ class AudioData32(AudioData):
             return tempfilename
         # now convert it to mp3
         if not filename.lower().endswith('.mp3'):
-            filename = filename + '.mp3'
+            filename += '.mp3'
         try:
             bitRate = MP3_BITRATE
         except NameError:
@@ -1508,6 +1508,10 @@ class AudioQuantumList(list, AudioRenderable):
     `loudness_begin`, `loudness_max`, `time_loudness_max`, and `loudness_end`
     are available.
     """
+
+    @property
+    def durations(self):
+        return self._durations
 
     @property
     def durations(self):

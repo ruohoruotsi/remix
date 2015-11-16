@@ -37,7 +37,7 @@ class RawOutstreamFile:
 
     def writeVarLen(self, value):
         "Writes a variable length word to the file"
-        var = self.writeSlice(writeVar(value))
+        self.writeSlice(writeVar(value))
 
 
     def write(self):

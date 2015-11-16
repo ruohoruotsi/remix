@@ -183,7 +183,7 @@ class SynchronizedAV():
         audio_filename = filename + '.wav'
         audioout = self.audio.encode(audio_filename, mp3=False)
         self.video.render()
-        res = sequencetomovie(filename, self.video, audioout)
+        sequencetomovie(filename, self.video, audioout)
         os.remove(audio_filename)
         return res
     
