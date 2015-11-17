@@ -145,13 +145,13 @@ class AudioAnalysis(object):
                     if lastTry:
                         raise
 
-                    if (isinstance(e, IOError)
-                        and (e.errno in [errno.EPIPE, errno.ECONNRESET]))\
-                    or (isinstance(e, pyechonest.util.EchoNestAPIError)
-                        and any([("Error %s" % x) in str(e) for x in [-1, 5, 6]])):
-                        log.warning("Upload to EN failed - transcoding and reattempting.")
-                        self.__init__(ffmpeg_downconvert(initializer, filetype), 'mp3', lastTry=True)
-                        return
+                    if (isinstance(e, IOError) and (e.errno in [errno.EPIPE, errno.ECONNRESET])) or \
+                            (isinstance(e, pyechonest.util.EchoNestAPIError) and \
+                                 any([("Error %s" % x) in str(e) for x in [-1, 5, 6]])):
+                        log.warning("Upload to EN failed - transcoding, NO LONGER reattempting.")
+                        # self.__init__(ffmpeg_downconvert(initializer, filetype), 'mp3', lastTry=True)
+                        # return
+                        raise
                     elif (isinstance(e, pyechonest.util.EchoNestAPIError)
                             and any([("Error %s" % x) in str(e) for x in [3]])):
                         log.warning("EN API limit hit. Waiting 10 seconds.")
@@ -392,10 +392,11 @@ class AudioData(AudioRenderable):
         elif self.convertedfile:
             file_to_read = self.convertedfile
         else:
-            temp_file_handle, self.convertedfile = tempfile.mkstemp(".wav")
-            self.sampleRate, self.numChannels = ffmpeg(self.filename, self.convertedfile, overwrite=True,
-                    numChannels=self.numChannels, sampleRate=self.sampleRate, verbose=self.verbose)
-            file_to_read = self.convertedfile
+            raise Exception("FFMPEG for conversion is no longer supported, how did we get here??")
+            # temp_file_handle, self.convertedfile = tempfile.mkstemp(".wav")
+            # self.sampleRate, self.numChannels = ffmpeg(self.filename, self.convertedfile, overwrite=True,
+            #         numChannels=self.numChannels, sampleRate=self.sampleRate, verbose=self.verbose)
+            # file_to_read = self.convertedfile
 
         w = wave.open(file_to_read, 'r')
         numFrames = w.getnframes()

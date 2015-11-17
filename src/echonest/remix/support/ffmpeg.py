@@ -79,6 +79,7 @@ def ffmpeg(infile, outfile=None, overwrite=True, bitRate=None,
         log.info(command)
 
     (lin, mac, win) = get_os()
+    print(command)
     p = subprocess.Popen(
             command,
             shell=False,
