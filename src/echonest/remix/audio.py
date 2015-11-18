@@ -392,11 +392,11 @@ class AudioData(AudioRenderable):
         elif self.convertedfile:
             file_to_read = self.convertedfile
         else:
-            raise Exception("FFMPEG for conversion is no longer supported, how did we get here??")
-            # temp_file_handle, self.convertedfile = tempfile.mkstemp(".wav")
-            # self.sampleRate, self.numChannels = ffmpeg(self.filename, self.convertedfile, overwrite=True,
-            #         numChannels=self.numChannels, sampleRate=self.sampleRate, verbose=self.verbose)
-            # file_to_read = self.convertedfile
+            # raise Exception("FFMPEG for conversion is no longer supported, how did we get here??")
+            temp_file_handle, self.convertedfile = tempfile.mkstemp(".wav")
+            self.sampleRate, self.numChannels = ffmpeg(self.filename, self.convertedfile, overwrite=True,
+                    numChannels=self.numChannels, sampleRate=self.sampleRate, verbose=self.verbose)
+            file_to_read = self.convertedfile
 
         w = wave.open(file_to_read, 'r')
         numFrames = w.getnframes()
