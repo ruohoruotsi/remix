@@ -13,22 +13,22 @@ import logging
 
 LOG = logging.getLogger(__name__)
 HOME = os.path.expanduser("~")
-REMIX_PATH = '.remix-db'
-REMIX_FOLDER = HOME + os.path.sep + REMIX_PATH
-AUDIO_FOLDER = REMIX_FOLDER + os.path.sep + 'audio'
-ANALYSIS_FOLDER = REMIX_FOLDER + os.path.sep + 'analysis'
-DATABASE = REMIX_FOLDER + os.path.sep + 'database.db'
+REMIX_DB_PATH = os.getcwd() + '/remix.db'
+# REMIX_FOLDER = REMIX_DB_PATH
+AUDIO_FOLDER = REMIX_DB_PATH + os.path.sep + 'audio'
+ANALYSIS_FOLDER = REMIX_DB_PATH + os.path.sep + 'analysis'
+DATABASE = REMIX_DB_PATH + os.path.sep + 'database.db'
 
 def check_and_create_local_db():
     '''If the local db does not exist, create it.'''
-    home_dir = os.listdir(HOME)
-    if REMIX_PATH in home_dir:
+    # home_dir = os.listdir(HOME)
+    if os.path.exists(REMIX_DB_PATH):
         LOG.info("Found local database.")
         return
     else:
         LOG.info("Local database not found, creating...")
 
-        os.mkdir(REMIX_FOLDER)
+        os.mkdir(REMIX_DB_PATH)
         os.mkdir(AUDIO_FOLDER)
         os.mkdir(ANALYSIS_FOLDER)
 
